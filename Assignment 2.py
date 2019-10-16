@@ -8,6 +8,8 @@ import time
 import itertools
 import sklearn
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn import naive_bayes
 import pickle
 import csv
 
@@ -105,56 +107,82 @@ if __name__ == '__main__':
 
     #-----------Prepping TrainingX Data
     # #vectorize word counts (normal vectorizer)
-    # vectorizer = CountVectorizer()
-    # TrainingX = vectorizer.fit_transform(reddit_train[:,1]) #stores vectorized feature data
+    # vectorizer = CountVectorizer(max_df=1000,min_df = 3)
+    # TrainingX = vectorizer.fit_transform(reddit_train[:, 1])  # stores vectorized feature data
+    # print(len(vectorizer.vocabulary_))
+
     #tf-idf vectorizer
-    tf_vectorizer = TfidfVectorizer()
+    tf_vectorizer = TfidfVectorizer(stop_words='english', strip_accents = 'ascii')#max_df=3000,min_df = 2)#
     TrainingX = tf_vectorizer.fit_transform(reddit_train[:,1])
     TestX = tf_vectorizer.transform(reddit_test[:,1])
-    ## normalizing the word counts
+    # normalizing the word counts
     # TrainingX = sklearn.preprocessing.normalize(TrainingX)
 
+#-------------------MULTINOMIAL  NB-------------
 
-    #--------Training the model
+mn_params = {
+    'fit_prior': [False],
+    'alpha': [0, 0.5, 1]}
+
+M = GridSearchCV(naive_bayes.MultinomialNB(),
+                 mn_params,
+                 cv=5,
+                 verbose=1,
+                 n_jobs=-1)
+
+M.fit(TrainingX,TrainingY)
+
+# testResults = M.predict(TestX)
+print(f'Train score = {M.score(TrainingX, TrainingY)}')
+
+
+#---------------------BERNOULLI NAIVE BAYES----------------------
+    #
+    # #--------Training the model
     # naiveBayesModel = BernoulliNaiveBayes()
     # naiveBayesModel.fit(TrainingX,TrainingY)
-
-    # #---Save model to pickle
-    filename = 'C:/Users/Hansen/Desktop/!School documents/McGill/U4/COMP551/Reddit-Comment-Classifier/naiveBayesModel.sav'
-    # pickle.dump(naiveBayesModel, open(filename, 'wb'))
-
-    #---Loading model from pickle
-    with open(filename, 'rb') as f:
-        naiveBayesModel = pickle.load(f)
-
-
-    # #----Obtaining training predictions using our trained model
+    #
+    #
+    # # #---Save model to pickle
+    # # filename = 'C:/Users/Hansen/Desktop/!School documents/McGill/U4/COMP551/Reddit-Comment-Classifier/naiveBayesModel.sav'
+    # # pickle.dump(naiveBayesModel, open(filename, 'wb'))
+    #
+    # # ---Loading model from pickle
+    # # with open(filename, 'rb') as f:
+    # #     naiveBayesModel = pickle.load(f)
+    #
+    #
+    # # #----Obtaining training predictions using our trained model
     # trainingResults = naiveBayesModel.predict(TrainingX)
     # print("Computing training set accuracy")
     # acc = evaluate_acc(TrainingY,trainingResults)
+    #
+    #
+    # # #---Predicting test results
+    # # testResults = naiveBayesModel.predict(TestX)
+    # # filename = 'testResults.sav'
+    # # pickle.dump(testResults, open(filename, 'wb'))
+    #
+    # # #---Loading test results (if necessary)
+    # # with open('testResults.sav', 'rb') as f:
+    # #     testResults = pickle.load(f)
+    # #
 
 
-    # #---Predicting test results
-    # testResults = naiveBayesModel.predict(TestX)
-    # filename = 'testResults.sav'
-    # pickle.dump(testResults, open(filename, 'wb'))
 
-    # #---Loading test results (if necessary)
-    with open('testResults.sav', 'rb') as f:
-        testResults = pickle.load(f)
 
-    # ----------Writing test results to csv file
-
-    numTestExamples = TestX.shape[0]
-    TestX[:, 0]  # gives the ids
-    testResultsString = [None for _ in range(numTestExamples)]
-    for ex in range(numTestExamples):
-        testResultsString[ex] = lb.classes_[int(testResults[ex])]
-    with open('testResults.csv', mode='w', newline='') as testResultsf:
-        results_writer = csv.writer(testResultsf, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        results_writer.writerow(['Id', 'Category'])
-        for ex in range(numTestExamples):
-            results_writer.writerow([reddit_test[ex, 0], testResultsString[ex]])
-
+# # ----------Writing test results to csv file----------
+#
+# numTestExamples = TestX.shape[0]
+# TestX[:, 0]  # gives the ids
+# testResultsString = [None for _ in range(numTestExamples)]
+# for ex in range(numTestExamples):
+#     testResultsString[ex] = lb.classes_[int(testResults[ex])]
+# with open('testResults.csv', mode='w', newline='') as testResultsf:
+#     results_writer = csv.writer(testResultsf, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+#     results_writer.writerow(['Id', 'Category'])
+#     for ex in range(numTestExamples):
+#         results_writer.writerow([reddit_test[ex, 0], testResultsString[ex]])
+#
 
 
