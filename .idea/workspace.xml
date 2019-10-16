@@ -2,9 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f8140aa9-a6f4-49e7-b288-2f71420f32c8" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assignment 2.py" beforeDir="false" afterPath="$PROJECT_DIR$/Assignment 2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/naiveBayesModel.sav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/testResults.csv" beforeDir="false" afterPath="$PROJECT_DIR$/testResults.csv" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -112,6 +113,8 @@
       <workItem from="1570591306312" duration="1215000" />
       <workItem from="1570592541108" duration="11184000" />
       <workItem from="1570681694976" duration="821000" />
+      <workItem from="1571176577002" duration="5599000" />
+      <workItem from="1571236992761" duration="706000" />
     </task>
     <servers />
   </component>
@@ -123,7 +126,9 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
           </value>
         </entry>
       </map>
@@ -132,6 +137,6 @@
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Assignment_2$Assignment_2.coverage" NAME="Assignment 2 Coverage Results" MODIFIED="1570639465584" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/venv" />
     <SUITE FILE_PATH="coverage/Reddit_Comment_Classifier$Assignment_2.coverage" NAME="Assignment 2 Coverage Results" MODIFIED="1570682061394" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/venv" />
-    <SUITE FILE_PATH="coverage/Reddit_Comment_Classifier$Assignment_2__1_.coverage" NAME="Assignment 2 (1) Coverage Results" MODIFIED="1570682482668" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Reddit_Comment_Classifier$Assignment_2__1_.coverage" NAME="Assignment 2 (1) Coverage Results" MODIFIED="1571192598646" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
