@@ -50,101 +50,200 @@ IMPORTANT DATASTRUCTURES FOR TRAINING:
 
 import numpy as np
 import pandas as pd
-
-df = pd.read_csv('reddit_train.csv', index_col = 'id')
-
-# Categorize variables, keep mappings to labels
-
-df['category_id'] = df['subreddits'].factorize()[0]
-category_id_df = df[['subreddits', 'category_id']].drop_duplicates().sort_values('category_id')
-category_to_id = dict(category_id_df.values)
-id_to_category = dict(category_id_df[['category_id', 'subreddits']].values)
-df.head()
-
-
-df_X = df['comments'].to_frame()
-labels = df.category_id
-
-## LOAD FEATURES FROM ./data HERE
-X_processed = pd.read_csv('./data/X_processed.csv', index_col = 'id')
-X_processed_no_punctuation = pd.read_csv('./data/X_processed_no_punctuation.csv', index_col = 'id')
-X_processed_no_links = pd.read_csv('./data/X_processed_no_links.csv', index_col = 'id')
-X_processed_lemmatized = pd.read_csv('./data/X_processed_lemmatized.csv', index_col = 'id')
-X_processed_no_links_lemmatized = pd.read_csv('./data/X_processed_no_links_lemmatized.csv', index_col = 'id')
-X_processed_no_punctuation_lemmatized = pd.read_csv('./data/X_processed_no_punctuation_lemmatized.csv', index_col = 'id')
-X_all = pd.read_csv('./data/X_all.csv', index_col = 'id')
-X_all_lemmatized = pd.read_csv('./data/X_all_lemmatized.csv', index_col = 'id')
-
-features = [df_X, # Number of parameters: 
-            X_processed, # Number of parameters : 
-            X_processed_no_punctuation, # Number of parameters: 
-            X_processed_no_links, # Number of parameters: 
-            X_all, # Numberof parameters: 
-            X_processed_lemmatized, # Numberof parameters: 
-            X_processed_no_links_lemmatized, # 
-            X_processed_no_punctuation_lemmatized, # 
-            X_all_lemmatized] # 
-
-polarity = pd.read_csv('./data/polarity.csv', header = None).set_index(0)
-polarity.columns= ['polarity']
-
-subjectivity = pd.read_csv('./data/subjectivity.csv', header = None).set_index(0)
-subjectivity.columns = ['subjectivity']
-
-num_words = pd.read_csv('./data/num_words.csv', header = None).set_index(0)
-num_words.columns = ['num_words']
-
+import copy
 from sklearn.feature_extraction.text import TfidfVectorizer
+from scipy.sparse import hstack
 
-vectorizers = []
-for f in features:
-    tfid_reg = TfidfVectorizer()  
-    vectorizers.append(tfid_reg)
+def getFeatures():
+    df = pd.read_csv('reddit_train.csv', index_col = 'id')
+    df_X = df['comments'].to_frame()
+    X_processed = pd.read_csv('./data/X_processed.csv', index_col = 'id')
+    X_processed_no_punctuation = pd.read_csv('./data/X_processed_no_punctuation.csv', index_col = 'id')
+    X_processed_no_links = pd.read_csv('./data/X_processed_no_links.csv', index_col = 'id')
+    X_processed_lemmatized = pd.read_csv('./data/X_processed_lemmatized.csv', index_col = 'id')
+    X_processed_no_links_lemmatized = pd.read_csv('./data/X_processed_no_links_lemmatized.csv', index_col = 'id')
+    X_processed_no_punctuation_lemmatized = pd.read_csv('./data/X_processed_no_punctuation_lemmatized.csv', index_col = 'id')
+    X_all = pd.read_csv('./data/X_all.csv', index_col = 'id')
+    X_all_lemmatized = pd.read_csv('./data/X_all_lemmatized.csv', index_col = 'id')
     
-features_vectorizers = list(zip(features, vectorizers))
+    features = [df_X, # Number of parameters: 
+                X_processed, # Number of parameters : 
+                X_processed_no_punctuation, # Number of parameters: 
+                X_processed_no_links, # Number of parameters: 
+                X_all, # Numberof parameters: 
+                X_processed_lemmatized, # Numberof parameters: 
+                X_processed_no_links_lemmatized, # 
+                X_processed_no_punctuation_lemmatized, # 
+                X_all_lemmatized] # 
+    return features
 
-vectorizers_custom = []
-for f in features:
-    tfidf_custom = TfidfVectorizer(sublinear_tf=True, 
+def getAdditionalFeatures():
+    polarity = pd.read_csv('./data/polarity.csv', header = None).set_index(0)
+    polarity.columns= ['polarity']
+    
+    subjectivity = pd.read_csv('./data/subjectivity.csv', header = None).set_index(0)
+    subjectivity.columns = ['subjectivity']
+    
+    num_words = pd.read_csv('./data/num_words.csv', header = None).set_index(0)
+    num_words.columns = ['num_words']
+    return polarity, subjectivity, num_words
+
+def vectorizeData(features, vectorizerTemplate, polarity = None, subjectivity = None, num_words = None):
+    """
+    vectorizes the passed in features, takes in the features and the vectorizer you want to use
+    caller of this function needs to create the vectorizer to be used beforehand
+    this function will create copies of the vectorizer to fit transform each feature 
+    returns: tuple(array of vectorized features, tuple of vectorizers used)
+    """
+    vectorizers = []
+    for f in features:
+        vectorizers.append(copy.deepcopy(vectorizerTemplate))
+        
+    features_vectorizers = list(zip(features, vectorizers))
+    
+    # Vectorize and append metadata as well
+    features_num = []
+    index = 0
+    for f, v_reg in features_vectorizers:
+        print(index)
+        result_reg = v_reg.fit_transform(f.comments)
+        if polarity is not None:
+            result_reg = hstack((result_reg, np.array(polarity.polarity)[:,None]))
+        if subjectivity is not None:
+            result_reg = hstack((result_reg, np.array(subjectivity.subjectivity)[:,None]))
+        if num_words is not None:
+            result_reg = hstack((result_reg, np.array(num_words.num_words)[:,None]))
+        features_num.append(result_reg)
+        index+=1
+        
+    features_num_arr = [ x.toarray() for x in features_num ]
+    return features_num_arr, features_vectorizers
+    
+def defaultVectorize(features):
+    """
+    helper method to vectorize features using out of the box vectorizer
+    """
+    vectorizer = TfidfVectorizer()
+    polarity, subjectivity, num_words = getAdditionalFeatures()
+    return vectorizeData(features, vectorizer, polarity, subjectivity, num_words)
+
+def customVectorize(features):
+    """
+    helper method to vectorize features using our custom vectorizer
+    """
+    vectorizer = TfidfVectorizer(sublinear_tf=True, 
                            min_df=5, 
                            norm='l2', 
                            encoding='latin-1', 
                            ngram_range=(1, 2), 
                            stop_words='english')
-    vectorizers_custom.append(tfidf_custom)
-    
-features_vectorizers_custom = list(zip(features, vectorizers_custom))
+    polarity, subjectivity, num_words = getAdditionalFeatures()
+    return vectorizeData(features, vectorizer, polarity, subjectivity, num_words)
 
-from scipy.sparse import hstack
-
-features_num_cust = []
-index = 0
-for f, v_reg in features_vectorizers_custom:
-    print(index)
-    result_reg = v_reg.fit_transform(f.comments)
-    result_reg = hstack((result_reg, np.array(polarity.polarity)[:,None]))
-    result_reg = hstack((result_reg, np.array(subjectivity.subjectivity)[:,None]))
-    result_reg = hstack((result_reg, np.array(num_words.num_words)[:,None]))
-    features_num_cust.append(result_reg)
-    index+=1
-
-features_num_arr_cust = [ x.toarray() for x in features_num_cust ]   
+if __name__ == "__main__":
+    features = getFeatures()
+    polarity, subjectivity, num_words = getAdditionalFeatures()
+    vectorizedfeatures, feature_vectorizers = customVectorize(features)
 
 
-# Vectorize and append metadata as well
-features_num = []
-index = 0
-for f, v_reg in features_vectorizers:
-    print(index)
-    result_reg = v_reg.fit_transform(f.comments)
-    result_reg = hstack((result_reg, np.array(polarity.polarity)[:,None]))
-    result_reg = hstack((result_reg, np.array(subjectivity.subjectivity)[:,None]))
-    result_reg = hstack((result_reg, np.array(num_words.num_words)[:,None]))
-    features_num.append(result_reg)
-    index+=1
+
     
 
-features_num_arr = [ x.toarray() for x in features_num ]
+#
+#df = pd.read_csv('reddit_train.csv', index_col = 'id')
+## Categorize variables, keep mappings to labels
+#
+#df['category_id'] = df['subreddits'].factorize()[0]
+#category_id_df = df[['subreddits', 'category_id']].drop_duplicates().sort_values('category_id')
+#category_to_id = dict(category_id_df.values)
+#id_to_category = dict(category_id_df[['category_id', 'subreddits']].values)
+#df.head()
+#labels = df.category_id
+#
+#
+#df_X = df['comments'].to_frame()
+#
+### LOAD FEATURES FROM ./data HERE
+#X_processed = pd.read_csv('./data/X_processed.csv', index_col = 'id')
+#X_processed_no_punctuation = pd.read_csv('./data/X_processed_no_punctuation.csv', index_col = 'id')
+#X_processed_no_links = pd.read_csv('./data/X_processed_no_links.csv', index_col = 'id')
+#X_processed_lemmatized = pd.read_csv('./data/X_processed_lemmatized.csv', index_col = 'id')
+#X_processed_no_links_lemmatized = pd.read_csv('./data/X_processed_no_links_lemmatized.csv', index_col = 'id')
+#X_processed_no_punctuation_lemmatized = pd.read_csv('./data/X_processed_no_punctuation_lemmatized.csv', index_col = 'id')
+#X_all = pd.read_csv('./data/X_all.csv', index_col = 'id')
+#X_all_lemmatized = pd.read_csv('./data/X_all_lemmatized.csv', index_col = 'id')
+#
+#features = [df_X, # Number of parameters: 
+#            X_processed, # Number of parameters : 
+#            X_processed_no_punctuation, # Number of parameters: 
+#            X_processed_no_links, # Number of parameters: 
+#            X_all, # Numberof parameters: 
+#            X_processed_lemmatized, # Numberof parameters: 
+#            X_processed_no_links_lemmatized, # 
+#            X_processed_no_punctuation_lemmatized, # 
+#            X_all_lemmatized] # 
+#
+#polarity = pd.read_csv('./data/polarity.csv', header = None).set_index(0)
+#polarity.columns= ['polarity']
+#
+#subjectivity = pd.read_csv('./data/subjectivity.csv', header = None).set_index(0)
+#subjectivity.columns = ['subjectivity']
+#
+#num_words = pd.read_csv('./data/num_words.csv', header = None).set_index(0)
+#num_words.columns = ['num_words']
+#
+#from sklearn.feature_extraction.text import TfidfVectorizer
+#from scipy.sparse import hstack
+#
+## out of the box vectorising of data
+#vectorizers = []
+#for f in features:
+#    tfid_reg = TfidfVectorizer()  
+#    vectorizers.append(tfid_reg)
+#    
+#features_vectorizers = list(zip(features, vectorizers))
+#
+## Vectorize and append metadata as well
+#features_num = []
+#index = 0
+#for f, v_reg in features_vectorizers:
+#    print(index)
+#    result_reg = v_reg.fit_transform(f.comments)
+#    result_reg = hstack((result_reg, np.array(polarity.polarity)[:,None]))
+#    result_reg = hstack((result_reg, np.array(subjectivity.subjectivity)[:,None]))
+#    result_reg = hstack((result_reg, np.array(num_words.num_words)[:,None]))
+#    features_num.append(result_reg)
+#    index+=1
+#    
+#features_num_arr = [ x.toarray() for x in features_num ]
+#
+#
+#
+## custom vectorizing of data
+#vectorizers_custom = []
+#for f in features:
+#    tfidf_custom = TfidfVectorizer(sublinear_tf=True, 
+#                           min_df=5, 
+#                           norm='l2', 
+#                           encoding='latin-1', 
+#                           ngram_range=(1, 2), 
+#                           stop_words='english')
+#    vectorizers_custom.append(tfidf_custom)
+#    
+#features_vectorizers_custom = list(zip(features, vectorizers_custom))
+#
+#features_num_cust = []
+#index = 0
+#for f, v_reg in features_vectorizers_custom:
+#    print(index)
+#    result_reg = v_reg.fit_transform(f.comments)
+#    result_reg = hstack((result_reg, np.array(polarity.polarity)[:,None]))
+#    result_reg = hstack((result_reg, np.array(subjectivity.subjectivity)[:,None]))
+#    result_reg = hstack((result_reg, np.array(num_words.num_words)[:,None]))
+#    features_num_cust.append(result_reg)
+#    index+=1
+#
+#features_num_arr_cust = [ x.toarray() for x in features_num_cust ]   
 
 
 

@@ -4,17 +4,38 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestClassifier, VotingClassifier
 import pandas as pd
 
-
+import training as t
 
 clf1 = LogisticRegression(solver='lbfgs', multi_class='multinomial', random_state=1)
 clf2 = RandomForestClassifier(n_estimators=50, random_state=1)
 clf3 = GaussianNB()
 
-X_processed = pd.read_csv('./data/X_processed.csv', index_col = 'id')
-X_processed_no_punctuation = pd.read_csv('./data/X_processed_no_punctuation.csv', index_col = 'id')
-X_processed_no_links = pd.read_csv('./data/X_processed_no_links.csv', index_col = 'id')
-X_processed_lemmatized = pd.read_csv('./data/X_processed_lemmatized.csv', index_col = 'id')
-X_processed_no_links_lemmatized = pd.read_csv('./data/X_processed_no_links_lemmatized.csv', index_col = 'id')
-X_processed_no_punctuation_lemmatized = pd.read_csv('./data/X_processed_no_punctuation_lemmatized.csv', index_col = 'id')
-X_all = pd.read_csv('./data/X_all.csv', index_col = 'id')
-X_all_lemmatized = pd.read_csv('./data/X_all_lemmatized.csv', index_col = 'id')
+eclf1 = VotingClassifier(estimators=[
+        ('lr', clf1), ('rf', clf2), ('gnb', clf3)], voting='hard')
+
+
+df = pd.read_csv('reddit_train.csv', index_col = 'id')
+# Categorize variables, keep mappings to labels
+
+df['category_id'] = df['subreddits'].factorize()[0]
+category_id_df = df[['subreddits', 'category_id']].drop_duplicates().sort_values('category_id')
+category_to_id = dict(category_id_df.values)
+id_to_category = dict(category_id_df[['category_id', 'subreddits']].values)
+df.head()
+labels = df.category_id
+
+features = t.getFeatures()
+
+selectedFeatures = []
+selectedFeatures = selectedFeatures + [features[8]]
+
+vectorizedFeatures = t.customVectorize(selectedFeatures)
+
+vector = vectorizedFeatures[0]
+vectorizers = vectorizedFeatures[1]
+
+eclf1 = eclf1.fit(vector, labels)
+print(eclf1.score(vector, labels))
+
+
+
