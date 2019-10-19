@@ -145,7 +145,6 @@ for f in features_num_arr_cust:
          wr.writerow(f)
     index += 1
 
-###### IMPORT VECTORIZED DATA HERE
 '''
 # Vectorize and append metadata as well
 features_num = []
@@ -176,22 +175,4 @@ for f in features_num_arr:
     
 features_num_parameters = [ len(x[0]) for x in features_num_arr ]
 '''
-# Indices with the least number of paramters is 8
-
-target_features = features_num_arr_cust[8]  
-
-# Train models to see if we find any pre-processing operations that help more than others
-from sklearn.svm import LinearSVC
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.model_selection import cross_val_score
-
-models = [ LinearSVC(), LogisticRegression(), RandomForestClassifier(), MultinomialNB()]
-
-acc_svc = cross_val_score(models[0], target_features, labels, scoring = 'accuracy', cv = 2)
-
-
-
-
 
