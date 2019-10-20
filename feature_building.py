@@ -31,38 +31,37 @@ df_X.to_csv('./data/original_X.csv')
 labels.to_csv('./data/labels.csv')
 
 #Compute Polarity, Subjectivity, and Length on original comment
-#polarity = add_feature(get_polarity, df_X.copy(), 'comments', 'polarity')['polarity']
-#subjectivity = add_feature(get_subjectivity, df_X.copy(), 'comments', 'subjectivity')['subjectivity']
-#num_words = add_feature(get_num_words, df_X.copy(), 'comments', 'num_words')['num_words']
+polarity = add_feature(get_polarity, df_X.copy(), 'comments', 'polarity')['polarity']
+subjectivity = add_feature(get_subjectivity, df_X.copy(), 'comments', 'subjectivity')['subjectivity']
+num_words = add_feature(get_num_words, df_X.copy(), 'comments', 'num_words')['num_words']
 
-#polarity.to_csv('./data/polarity.csv')
-#subjectivity.to_csv('./data/subjectivity.csv')
-#num_words.to_csv('./data/num_words.csv')
+polarity.to_csv('./data/polarity.csv')
+subjectivity.to_csv('./data/subjectivity.csv')
+num_words.to_csv('./data/num_words.csv')
 
 # Add pre-process comments and see which processing imapacts the result the most
 # Save all of them to reload them later
 
-#X_processed_no_links = add_feature(get_comment_without_links, df_X.copy(), 'comments', 'comments', remove_org_col = True)
-#X_processed_no_links.to_csv('./data/X_processed_no_links.csv')
+X_no_links = add_feature(get_comment_without_links, df_X.copy(), 'comments', 'comments', remove_org_col = True)
+X_no_links.to_csv('./data/X_no_links.csv')
 
-X_processed = add_feature(get_processed_comment, X_processed_no_links.copy(), 'comments', 'comments', remove_org_col = True)
-X_processed.to_csv('./data/X_processed.csv')
+X_processed_no_links = add_feature(get_processed_comment, X_no_links.copy(), 'comments', 'comments', remove_org_col = True)
+X_processed_no_links.to_csv('./data/X_processed_no_links.csv')
 
-X_processed_no_punctuation = add_feature(get_comment_no_punctuation, X_processed.copy(), 'comments', 'comments', remove_org_col = True)
+X_processed_no_punctuation = add_feature(get_comment_no_punctuation, X_processed_no_links.copy(), 'comments', 'comments', remove_org_col = True)
 X_processed_no_punctuation.to_csv('./data/X_processed_no_punctuation.csv')
 
-
-X_processed_lemmatized = add_feature(get_lemmatized_comment, X_processed.copy(), 'comments', 'comments', remove_org_col = True)
+X_processed_lemmatized = add_feature(get_lemmatized_comment, X_processed_no_links.copy(), 'comments', 'comments', remove_org_col = True)
 X_processed_lemmatized.to_csv('./data/X_processed_lemmatized.csv')
 
-X_processed_no_links_lemmatized = add_feature(get_lemmatized_comment, X_processed_no_links.copy(), 'comments', 'comments', remove_org_col = True)
+X_processed_no_links_lemmatized = add_feature(get_lemmatized_comment, X_no_links.copy(), 'comments', 'comments', remove_org_col = True)
 X_processed_no_links_lemmatized.to_csv('./data/X_processed_no_links_lemmatized.csv')
 
-X_processed_no_punctuation_lemmatized = add_feature(get_lemmatized_comment, X_processed.copy(), 'comments', 'comments', remove_org_col = True)
+X_processed_no_punctuation_lemmatized = add_feature(get_lemmatized_comment, X_processed_no_links.copy(), 'comments', 'comments', remove_org_col = True)
 X_processed_no_punctuation_lemmatized.to_csv('./data/X_processed_no_punctuation_lemmatized.csv')
 
 # Finally, have a set with all preprocessing applied
-X_all = X_processed.copy()
+X_all = X_processed_no_links.copy()
 X_all = add_feature(get_comment_without_links, X_all, 'comments', 'comments', remove_org_col = True)
 X_all = add_feature(get_comment_no_punctuation, X_all, 'comments', 'comments', remove_org_col = True)
 X_all.to_csv('./data/X_all.csv')
@@ -74,9 +73,9 @@ X_all_lemmatized.to_csv('./data/X_all_lemmatized.csv')
 
 
 ## LOAD FEATURES FROM ./data HERE
-X_processed = pd.read_csv('./data/X_processed.csv', index_col = 'id')
-X_processed_no_punctuation = pd.read_csv('./data/X_processed_no_punctuation.csv', index_col = 'id')
 X_processed_no_links = pd.read_csv('./data/X_processed_no_links.csv', index_col = 'id')
+X_processed_no_punctuation = pd.read_csv('./data/X_processed_no_punctuation.csv', index_col = 'id')
+X_no_links = pd.read_csv('./data/X_no_links.csv', index_col = 'id')
 X_processed_lemmatized = pd.read_csv('./data/X_processed_lemmatized.csv', index_col = 'id')
 X_processed_no_links_lemmatized = pd.read_csv('./data/X_processed_no_links_lemmatized.csv', index_col = 'id')
 X_processed_no_punctuation_lemmatized = pd.read_csv('./data/X_processed_no_punctuation_lemmatized.csv', index_col = 'id')
@@ -84,9 +83,9 @@ X_all = pd.read_csv('./data/X_all.csv', index_col = 'id')
 X_all_lemmatized = pd.read_csv('./data/X_all_lemmatized.csv', index_col = 'id')
 
 features = [df_X, # Number of parameters: 38308
-            X_processed, # Number of parameters : 36471
+            X_processed_no_links, # Number of parameters : 36471
             X_processed_no_punctuation, # Number of parameters: 35820
-            X_processed_no_links, # Number of parameters: 36434
+            X_no_links, # Number of parameters: 36434
             X_all, # Numberof parameters: 35780
             X_processed_lemmatized, # Numberof parameters: 36879
             X_processed_no_links_lemmatized, # 36834
