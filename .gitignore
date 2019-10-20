@@ -1,3 +1,10 @@
+.vscode/
+.vs/
+.idea/
+.ipynb_checkpoints/
+!.vscode/launch.json
+__pycache__/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
