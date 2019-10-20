@@ -12,6 +12,8 @@ from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn import naive_bayes
 import pickle
 import csv
+import ktrain
+from ktrain import text
 
 ##-----------------------------------------------------------------BernoulliNaiveBayes
 class BernoulliNaiveBayes(object):
@@ -105,72 +107,95 @@ if __name__ == '__main__':
     lb.fit(reddit_train[:,2])
     TrainingY = lb.transform(reddit_train[:,2]) #subreddits in index form 0-19. call lb.classes_[index] to get subreddit name
 
+    #---------------BERT TECHNIQUE------------
+
+
+    (x_train, y_train),(x_test,y_test), preproc = text.texts_from_array(x_train=reddit_train[:,1].tolist(), y_train=TrainingY.tolist(),preprocess_mode='bert'
+                                                                        ,class_names = reddit_train[:,2].tolist(),maxlen=350)
+
+    model = text.text_classifier(name='bert', train_data=(x_train, y_train), preproc=preproc)
+    learner = ktrain.get_learner(model, train_data=(x_train, y_train), batch_size=6)
+
+    learner.fit_onecycle(2e-5, 1)
+
+    #Save BERT to pickle
+    filename = 'C:/Users/Hansen/Desktop/!School documents/McGill/U4/COMP551/Reddit-Comment-Classifier/learner.sav'
+    pickle.dump(learner, open(filename, 'wb'))
+
+    filename = 'C:/Users/Hansen/Desktop/!School documents/McGill/U4/COMP551/Reddit-Comment-Classifier/preproc.sav'
+    pickle.dump(preproc, open(filename, 'wb'))
+
+    filename = 'C:/Users/Hansen/Desktop/!School documents/McGill/U4/COMP551/Reddit-Comment-Classifier/model.sav'
+    pickle.dump(model, open(filename, 'wb'))
+
+
+
     #-----------Prepping TrainingX Data
     # #vectorize word counts (normal vectorizer)
     # vectorizer = CountVectorizer(max_df=1000,min_df = 3)
     # TrainingX = vectorizer.fit_transform(reddit_train[:, 1])  # stores vectorized feature data
     # print(len(vectorizer.vocabulary_))
-
-    #tf-idf vectorizer
-    tf_vectorizer = TfidfVectorizer(stop_words='english', strip_accents = 'ascii')#max_df=3000,min_df = 2)#
-    TrainingX = tf_vectorizer.fit_transform(reddit_train[:,1])
-    TestX = tf_vectorizer.transform(reddit_test[:,1])
-    # normalizing the word counts
-    # TrainingX = sklearn.preprocessing.normalize(TrainingX)
-
-#-------------------MULTINOMIAL  NB-------------
-
-mn_params = {
-    'fit_prior': [False],
-    'alpha': [0, 0.5, 1]}
-
-M = GridSearchCV(naive_bayes.MultinomialNB(),
-                 mn_params,
-                 cv=5,
-                 verbose=1,
-                 n_jobs=-1)
-
-M.fit(TrainingX,TrainingY)
-
+#
+#     #tf-idf vectorizer
+#     tf_vectorizer = TfidfVectorizer(stop_words='english', strip_accents = 'ascii')#max_df=3000,min_df = 2)#
+#     TrainingX = tf_vectorizer.fit_transform(reddit_train[:,1])
+#     TestX = tf_vectorizer.transform(reddit_test[:,1])
+#     # normalizing the word counts
+#     # TrainingX = sklearn.preprocessing.normalize(TrainingX)
+#
+# #-------------------MULTINOMIAL  NB-------------
+#
+# mn_params = {
+#     'fit_prior': [False],
+#     'alpha': [0.1]}
+#
+# M = GridSearchCV(naive_bayes.MultinomialNB(),
+#                  mn_params,
+#                  cv=5,
+#                  verbose=1,
+#                  n_jobs=-1)
+#
+# M.fit(TrainingX,TrainingY)
+#
 # testResults = M.predict(TestX)
-print(f'Train score = {M.score(TrainingX, TrainingY)}')
-
-
-#---------------------BERNOULLI NAIVE BAYES----------------------
-    #
-    # #--------Training the model
-    # naiveBayesModel = BernoulliNaiveBayes()
-    # naiveBayesModel.fit(TrainingX,TrainingY)
-    #
-    #
-    # # #---Save model to pickle
-    # # filename = 'C:/Users/Hansen/Desktop/!School documents/McGill/U4/COMP551/Reddit-Comment-Classifier/naiveBayesModel.sav'
-    # # pickle.dump(naiveBayesModel, open(filename, 'wb'))
-    #
-    # # ---Loading model from pickle
-    # # with open(filename, 'rb') as f:
-    # #     naiveBayesModel = pickle.load(f)
-    #
-    #
-    # # #----Obtaining training predictions using our trained model
-    # trainingResults = naiveBayesModel.predict(TrainingX)
-    # print("Computing training set accuracy")
-    # acc = evaluate_acc(TrainingY,trainingResults)
-    #
-    #
-    # # #---Predicting test results
-    # # testResults = naiveBayesModel.predict(TestX)
-    # # filename = 'testResults.sav'
-    # # pickle.dump(testResults, open(filename, 'wb'))
-    #
-    # # #---Loading test results (if necessary)
-    # # with open('testResults.sav', 'rb') as f:
-    # #     testResults = pickle.load(f)
-    # #
-
-
-
-
+# print(f'Train score = {M.score(TrainingX, TrainingY)}')
+#
+#
+# #---------------------BERNOULLI NAIVE BAYES----------------------
+#     #
+#     # #--------Training the model
+#     # naiveBayesModel = BernoulliNaiveBayes()
+#     # naiveBayesModel.fit(TrainingX,TrainingY)
+#     #
+#     #
+#     # # #---Save model to pickle
+#     # # filename = 'C:/Users/Hansen/Desktop/!School documents/McGill/U4/COMP551/Reddit-Comment-Classifier/naiveBayesModel.sav'
+#     # # pickle.dump(naiveBayesModel, open(filename, 'wb'))
+#     #
+#     # # ---Loading model from pickle
+#     # # with open(filename, 'rb') as f:
+#     # #     naiveBayesModel = pickle.load(f)
+#     #
+#     #
+#     # # #----Obtaining training predictions using our trained model
+#     # trainingResults = naiveBayesModel.predict(TrainingX)
+#     # print("Computing training set accuracy")
+#     # acc = evaluate_acc(TrainingY,trainingResults)
+#     #
+#     #
+#     # # #---Predicting test results
+#     # # testResults = naiveBayesModel.predict(TestX)
+#     # # filename = 'testResults.sav'
+#     # # pickle.dump(testResults, open(filename, 'wb'))
+#     #
+#     # # #---Loading test results (if necessary)
+#     # # with open('testResults.sav', 'rb') as f:
+#     # #     testResults = pickle.load(f)
+#     # #
+#
+#
+#
+#
 # # ----------Writing test results to csv file----------
 #
 # numTestExamples = TestX.shape[0]
@@ -184,5 +209,5 @@ print(f'Train score = {M.score(TrainingX, TrainingY)}')
 #     for ex in range(numTestExamples):
 #         results_writer.writerow([reddit_test[ex, 0], testResultsString[ex]])
 #
-
-
+#
+#
