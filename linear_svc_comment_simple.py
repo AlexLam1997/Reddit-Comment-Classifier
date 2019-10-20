@@ -85,4 +85,4 @@ Id = np.arange(0, len(test_preds_labels))
 d = {'Id': Id, 'Category': test_preds_labels}
 final_df = pd.DataFrame(data=d)
 
-final_df.to_csv('./test.csv', index=False)
+final_df.to_csv('./simple_linear_svc_results.csv', index=False)
