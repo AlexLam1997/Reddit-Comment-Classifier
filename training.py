@@ -116,8 +116,8 @@ def vectorizeData(features, vectorizerTemplate, polarity = None, subjectivity = 
         features_num.append(result_reg)
         index+=1
         
-    features_num_arr = [ x.toarray() for x in features_num ]
-    return features_num_arr, features_vectorizers
+    # features_num_arr = [ x.todense() for x in features_num ]
+    return features_num, features_vectorizers
     
 def defaultVectorize(features):
     """
@@ -125,7 +125,7 @@ def defaultVectorize(features):
     """
     vectorizer = TfidfVectorizer()
     polarity, subjectivity, num_words = getAdditionalFeatures()
-    return vectorizeData(features, vectorizer, polarity, subjectivity, num_words)
+    return vectorizeData(features, vectorizer, polarity= None, subjectivity = subjectivity, num_words= num_words)
 
 def customVectorize(features):
     """
@@ -138,7 +138,7 @@ def customVectorize(features):
                            ngram_range=(1, 2), 
                            stop_words='english')
     polarity, subjectivity, num_words = getAdditionalFeatures()
-    return vectorizeData(features, vectorizer, polarity, subjectivity, num_words)
+    return vectorizeData(features, vectorizer)
 
 if __name__ == "__main__":
     features = getFeatures()
