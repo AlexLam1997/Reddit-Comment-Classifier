@@ -1,9 +1,0 @@
-0 : original
-1 : processed
-2 : processed no punctuation
-3 : processed no links
-4 : processed, no punctuation, no links
-5 : processed, lemmatized
-6 : processed, no links, lemmatized
-7 : processed, no punctuation, lemmatized
-8 : processed, no links, no punctuation, lemmatized
