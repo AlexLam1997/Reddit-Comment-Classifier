@@ -29,13 +29,11 @@ features = t.getFeatures()
 selectedFeatures = []
 selectedFeatures = selectedFeatures + [features[8]]
 
-vectorizedFeatures = t.customVectorize(selectedFeatures)
+vectorizedFeatures, vectorizers = t.customVectorize(selectedFeatures)
 
-vector = vectorizedFeatures[0]
-vectorizers = vectorizedFeatures[1]
 
-eclf1 = eclf1.fit(vector, labels)
-print(eclf1.score(vector, labels))
+eclf1 = eclf1.fit(vectorizedFeatures[0:10000], labels[0:10000])
+print(eclf1.score(vectorizedFeatures, labels))
 
 
 

@@ -31,24 +31,26 @@ df_X.to_csv('./data/original_X.csv')
 labels.to_csv('./data/labels.csv')
 
 #Compute Polarity, Subjectivity, and Length on original comment
-polarity = add_feature(get_polarity, df_X.copy(), 'comments', 'polarity')['polarity']
-subjectivity = add_feature(get_subjectivity, df_X.copy(), 'comments', 'subjectivity')['subjectivity']
-num_words = add_feature(get_num_words, df_X.copy(), 'comments', 'num_words')['num_words']
+#polarity = add_feature(get_polarity, df_X.copy(), 'comments', 'polarity')['polarity']
+#subjectivity = add_feature(get_subjectivity, df_X.copy(), 'comments', 'subjectivity')['subjectivity']
+#num_words = add_feature(get_num_words, df_X.copy(), 'comments', 'num_words')['num_words']
 
-polarity.to_csv('./data/polarity.csv')
-subjectivity.to_csv('./data/subjectivity.csv')
-num_words.to_csv('./data/num_words.csv')
+#polarity.to_csv('./data/polarity.csv')
+#subjectivity.to_csv('./data/subjectivity.csv')
+#num_words.to_csv('./data/num_words.csv')
 
 # Add pre-process comments and see which processing imapacts the result the most
 # Save all of them to reload them later
-X_processed = add_feature(get_processed_comment, df_X.copy(), 'comments', 'comments', remove_org_col = True)
+
+#X_processed_no_links = add_feature(get_comment_without_links, df_X.copy(), 'comments', 'comments', remove_org_col = True)
+#X_processed_no_links.to_csv('./data/X_processed_no_links.csv')
+
+X_processed = add_feature(get_processed_comment, X_processed_no_links.copy(), 'comments', 'comments', remove_org_col = True)
 X_processed.to_csv('./data/X_processed.csv')
 
 X_processed_no_punctuation = add_feature(get_comment_no_punctuation, X_processed.copy(), 'comments', 'comments', remove_org_col = True)
 X_processed_no_punctuation.to_csv('./data/X_processed_no_punctuation.csv')
 
-X_processed_no_links = add_feature(get_comment_without_links, X_processed.copy(), 'comments', 'comments', remove_org_col = True)
-X_processed_no_links.to_csv('./data/X_processed_no_links.csv')
 
 X_processed_lemmatized = add_feature(get_lemmatized_comment, X_processed.copy(), 'comments', 'comments', remove_org_col = True)
 X_processed_lemmatized.to_csv('./data/X_processed_lemmatized.csv')
