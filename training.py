@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
 """
 Created on Sat Oct 19 15:43:16 2019
 
@@ -57,22 +58,22 @@ from scipy.sparse import hstack
 def getFeatures():
     df = pd.read_csv('reddit_train.csv', index_col = 'id')
     df_X = df['comments'].to_frame()
-    X_processed = pd.read_csv('./data/X_processed.csv', index_col = 'id')
-    X_processed_no_punctuation = pd.read_csv('./data/X_processed_no_punctuation.csv', index_col = 'id')
+    X_no_links = pd.read_csv('./data/X_no_links.csv', index_col = 'id')
     X_processed_no_links = pd.read_csv('./data/X_processed_no_links.csv', index_col = 'id')
+    X_processed_no_punctuation = pd.read_csv('./data/X_processed_no_punctuation.csv', index_col = 'id')
     X_processed_lemmatized = pd.read_csv('./data/X_processed_lemmatized.csv', index_col = 'id')
     X_processed_no_links_lemmatized = pd.read_csv('./data/X_processed_no_links_lemmatized.csv', index_col = 'id')
     X_processed_no_punctuation_lemmatized = pd.read_csv('./data/X_processed_no_punctuation_lemmatized.csv', index_col = 'id')
     X_all = pd.read_csv('./data/X_all.csv', index_col = 'id')
     X_all_lemmatized = pd.read_csv('./data/X_all_lemmatized.csv', index_col = 'id')
-    
-    features = [df_X, # Number of parameters: 
-                X_processed, # Number of parameters : 
-                X_processed_no_punctuation, # Number of parameters: 
-                X_processed_no_links, # Number of parameters: 
-                X_all, # Numberof parameters: 
-                X_processed_lemmatized, # Numberof parameters: 
-                X_processed_no_links_lemmatized, # 
+
+    features = [df_X, # Number of parameters: 38308
+                X_processed_no_links, # Number of parameters : 36471
+                X_processed_no_punctuation, # Number of parameters: 35820
+                X_no_links, # Number of parameters: 36434
+                X_all, # Numberof parameters: 35780
+                X_processed_lemmatized, # Numberof parameters: 36879
+                X_processed_no_links_lemmatized, # 36834
                 X_processed_no_punctuation_lemmatized, # 
                 X_all_lemmatized] # 
     return features
@@ -119,15 +120,14 @@ def vectorizeData(features, vectorizerTemplate, polarity = None, subjectivity = 
     # features_num_arr = [ x.todense() for x in features_num ]
     return features_num, features_vectorizers
     
-def defaultVectorize(features):
+def defaultVectorize(features, polarity = None, subjectivity = None, num_words = None):
     """
     helper method to vectorize features using out of the box vectorizer
     """
     vectorizer = TfidfVectorizer()
-    polarity, subjectivity, num_words = getAdditionalFeatures()
-    return vectorizeData(features, vectorizer, polarity= None, subjectivity = subjectivity, num_words= num_words)
+    return vectorizeData(features, vectorizer, polarity= polarity, subjectivity = subjectivity, num_words= num_words)
 
-def customVectorize(features):
+def customVectorize(features, polarity = None, subjectivity = None, num_words = None):
     """
     helper method to vectorize features using our custom vectorizer
     """
@@ -137,18 +137,14 @@ def customVectorize(features):
                            encoding='latin-1', 
                            ngram_range=(1, 2), 
                            stop_words='english')
-    polarity, subjectivity, num_words = getAdditionalFeatures()
-    return vectorizeData(features, vectorizer)
+    return vectorizeData(features, vectorizer, polarity= polarity, subjectivity = subjectivity, num_words= num_words)
+
+print('hi')
 
 if __name__ == "__main__":
     features = getFeatures()
     polarity, subjectivity, num_words = getAdditionalFeatures()
-    vectorizedfeatures, feature_vectorizers = customVectorize(features)
-
-
-
-    
-
+    vectorizedfeatures, feature_vectorizers = customVectorize(features[8])
 #
 #df = pd.read_csv('reddit_train.csv', index_col = 'id')
 ## Categorize variables, keep mappings to labels
