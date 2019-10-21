@@ -37,7 +37,7 @@ df_X = df['comments'].to_frame()
 labels = df.category_id
 
 ## LOAD FEATURES FROM ./data HERE
-X_processed = pd.read_csv('./data/X_processed.csv', index_col = 'id')
+#X_processed = pd.read_csv('./data/X_processed.csv', index_col = 'id')
 X_processed_no_punctuation = pd.read_csv('./data/X_processed_no_punctuation.csv', index_col = 'id')
 X_processed_no_links = pd.read_csv('./data/X_processed_no_links.csv', index_col = 'id')
 X_processed_lemmatized = pd.read_csv('./data/X_processed_lemmatized.csv', index_col = 'id')
@@ -47,7 +47,7 @@ X_all = pd.read_csv('./data/X_all.csv', index_col = 'id')
 X_all_lemmatized = pd.read_csv('./data/X_all_lemmatized.csv', index_col = 'id')
 
 features = [df_X, # Number of parameters: 
-            X_processed, # Number of parameters : 
+            #X_processed, # Number of parameters : 
             X_processed_no_punctuation, # Number of parameters: 
             X_processed_no_links, # Number of parameters: 
             X_all, # Numberof parameters: 
@@ -68,11 +68,11 @@ EMBEDDING_DIM = 100
 tokenizer = Tokenizer(num_words = MAX_NUM_WORDS, lower = True)
 
 #Tokenize comments
-tokenizer.fit_on_texts(X_processed['comments'].values)
+tokenizer.fit_on_texts(X_processed_lemmatized['comments'].values)
 word_index = tokenizer.word_index
 
 #Turn comments into sequences
-X = tokenizer.texts_to_sequences(X_processed['comments'].values)
+X = tokenizer.texts_to_sequences(X_processed_lemmatized['comments'].values)
 
 # Pad or truncuate the sequence to make them of equal length
 X = pad_sequences(X, maxlen = MAX_SEQUENCE_LENGTH)
