@@ -144,7 +144,7 @@ print('hi')
 if __name__ == "__main__":
     features = getFeatures()
     polarity, subjectivity, num_words = getAdditionalFeatures()
-    vectorizedfeatures, feature_vectorizers = customVectorize(features)
+    vectorizedfeatures, feature_vectorizers = customVectorize(features[8])
 #
 #df = pd.read_csv('reddit_train.csv', index_col = 'id')
 ## Categorize variables, keep mappings to labels
